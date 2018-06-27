@@ -1,0 +1,13 @@
+body {
+    background-image: url(../images/Star-Wars-Background-NP49.jpg);
+    background-size: 100%;
+}
+.jumbotron {
+    background-color: rgba(255, 255, 255, 0.37);
+}
+.card {
+    margin: 10px;
+}
+.card-text {
+    line-height: 50%;
+}
