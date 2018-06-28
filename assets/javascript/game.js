@@ -1,9 +1,9 @@
-// Create booleans to keep track of whether the play and enemy have been chosen, and if the game is over
+// Create booleans to keep track of whether the player's character and enemy have been chosen, and if the game is over
 var characterIsChosen = false;
 var enemyIsChosen = false;
 var gameIsOver = false;
 
-//Create arrays to store the characters, with the character being in a different array depending on if they are the play or an enemy
+//Create arrays to store the characters, with the character being in a different array depending on if they are the player or an enemy
 var characterChoices = [];
 var chosenCharacter = [];
 var remainingEnemies = [];
@@ -22,44 +22,50 @@ var setUpNewGame = function () {
     remainingEnemies.length = 0;
     defendingEnemy.length = 0;
 
-    // Remove any characters which may be currently displayed on screen
+    // Remove any characters and titles which may be currently displayed on screen
+    $("#choose-your-character-title").empty();
     $("#character-choice").empty();
+    $("#your-character-title").empty();
     $("#chosen-character").empty();
+    $("#enemy-to-fight-title").empty();
     $("#enemies").empty();
+    $("#defending-enemy-title").empty();
     $("#defender").empty();
+    $("#fight-button-location").empty();
+    $("#battle-information").empty();
 
     //Reset the character choices
     characterChoices = [{
             name: "yoda",
             displayName: "Yoda",
-            hp: 60,
-            baseAttack: 12,
+            hp: 70,
+            baseAttack: 13,
             totalAttack: 0,
-            counter: 20,
+            counter: 15,
         },
         {
             name: "han_solo",
             displayName: "Han Solo",
             hp: 90,
-            baseAttack: 4,
+            baseAttack: 11,
             totalAttack: 0,
-            counter: 8,
+            counter: 10,
         },
         {
             name: "general_grievous",
             displayName: "General Grievous",
-            hp: 130,
-            baseAttack: 14,
+            hp: 100,
+            baseAttack: 10,
             totalAttack: 0,
             counter: 7,
         },
         {
             name: "boba_fett",
             displayName: "Boba Fett",
-            hp: 100,
-            baseAttack: 10,
+            hp: 110,
+            baseAttack: 8,
             totalAttack: 0,
-            counter: 9,
+            counter: 11,
         }
     ]
 
@@ -73,19 +79,22 @@ var setUpNewGame = function () {
     characterChoices.forEach(function (element) {
         $("#character-choice").append(newCharacterCard(element, "availableChoice"));
     })
+
+    $("#choose-your-character-title").append("<h3>Choose Your Character:</h3>")
 }
+
 
 //Generate a new character card to be displayed on screen
 var newCharacterCard = function (characterArray, characterStatus) {
-    //add the correct color to the character card depending on the status
+    //Add the correct color to the character card depending on the status
     if (characterStatus === "availableChoice") {
         bgColor = "bg-light";
     } else if (characterStatus === "player") {
         bgColor = "bg-light";
     } else if (characterStatus === "remainingEnemy") {
-        bgColor = "bg-danger";
+        bgColor = "bg-danger text-light";
     } else if (characterStatus === "defendingEnemy") {
-        bgColor = "bg-dark";
+        bgColor = "bg-dark text-light";
     } else {
         bgColor = "bg-light";
     }
@@ -140,23 +149,17 @@ $(document).ready(function () {
             // Clear the characterChoices array and remove the choices from the screen
             characterChoices.length = 0;
             $("#character-choice").empty();
+            $("#choose-your-character-title").empty();
+
+            //Display the title for your character and the instruction to choose an enemy to fight
+            $("#your-character-title").append("<h3>Your Character:</h3>");
+            $("#enemy-to-fight-title").append("<h3>Choose an Enemy to Fight:</h3>");
 
             characterIsChosen = true;
-
-            // console.log("Chosen Character: " + chosenCharacterName)
-            // console.log("Is character chosen? " + characterIsChosen);
-            // console.log("Character Choices:");
-            // console.log(characterChoices);
-            // console.log("Character Chosen:");
-            // console.log(chosenCharacter);
-            // console.log("Enemies Remaining: ");
-            // console.log(remainingEnemies);
-
         }
-        // console.log("click worked");
-
     })
 
+    //When the user clicks an enemy to attack
     $(document).on("click", '.remainingEnemy', function () {
 
         //If no enemy is currently chosen, take action
@@ -167,7 +170,6 @@ $(document).ready(function () {
             var characterIndex = remainingEnemies.map(function (e) {
                 return e.name;
             }).indexOf(chosenEnemyName);
-            console.log("Chosen enemy index is: " + characterIndex);
 
             // Move the chosen enemy into the defendingEnemy array and out of the remainingEnemies array
             defendingEnemy.push(remainingEnemies[characterIndex]);
@@ -175,10 +177,14 @@ $(document).ready(function () {
             $("#defender").append(newCharacterCard(defendingEnemy[0], "defendingEnemy"));
 
             // Remove the enemy choices from the screen
+            $("#enemy-to-fight-title").empty();
             $("#enemies").empty();
 
-            enemyIsChosen = true;
+            //add the fight button
+            $("#fight-button-location").append("<button id='fight-button' type='button' class='btn btn-dark'>Fight!</button>");
+            $("#defending-enemy-title").append("<h3>Defending Enemy:</h3>");
 
+            enemyIsChosen = true;
         }
     });
 
@@ -187,6 +193,20 @@ $(document).ready(function () {
 
         //Only take action if there is an enemy chosen
         if (enemyIsChosen === true) {
+
+            //Display the battle information
+            $("#battle-information").empty();
+            var yourAttackInfo = $('<p>');
+            var enemyCounterInfo = $('<p>');
+            var attackIncreaseInfo = $('<p>');
+            var yourAttackText = "You dealt " + chosenCharacter[0].totalAttack + " damage to " + defendingEnemy[0].displayName + ".";
+            var enemyCounterText = defendingEnemy[0].displayName + " counter-attacked you for " + defendingEnemy[0].counter + " damage.";
+            var attackIncreaseText = "Your attack increased to " + (chosenCharacter[0].totalAttack + chosenCharacter[0].baseAttack) + "."
+            yourAttackInfo.text(yourAttackText);
+            enemyCounterInfo.text(enemyCounterText);
+            attackIncreaseInfo.text(attackIncreaseText)
+            $("#battle-information").append(yourAttackInfo, enemyCounterInfo, attackIncreaseInfo);
+
             //Have characters damage each other
             defendingEnemy[0].hp -= chosenCharacter[0].totalAttack;
             chosenCharacter[0].hp -= defendingEnemy[0].counter;
@@ -210,18 +230,24 @@ $(document).ready(function () {
             //If the defending enemy is defeated
             else if (defendingEnemy[0].hp <= 0) {
                 //Clear the defender from the defendingEnemy array and from the screen
+                $("#defending-enemy-title").empty();
                 $("#defender").empty();
+                $("#fight-button-location").empty();
+                $("#battle-information").empty();
                 defendingEnemy.length = 0;
                 enemyIsChosen = false;
 
                 //If there are any enemy choices still remaining
                 if (remainingEnemies.length > 0) {
 
+                    //Add the title with the instruction to choose an enemy
+                    $("#enemy-to-fight-title").append("<h3>Choose an Enemy to Fight:</h3>");
+
                     //Display the remaining enemies
                     remainingEnemies.forEach(function (element) {
                         $("#enemies").append(newCharacterCard(element, "remainingEnemy"));
                     })
-                } 
+                }
 
                 //If there are no enemies remaining, the player wins
                 else {

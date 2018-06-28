@@ -11,3 +11,7 @@ body {
 .card-text {
     line-height: 50%;
 }
+#fight-button {
+
+    margin-bottom: 10px;
+}
