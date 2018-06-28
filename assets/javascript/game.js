@@ -49,7 +49,7 @@ var setUpNewGame = function () {
             hp: 90,
             baseAttack: 11,
             totalAttack: 0,
-            counter: 10,
+            counter: 9,
         },
         {
             name: "general_grievous",
@@ -63,7 +63,7 @@ var setUpNewGame = function () {
             name: "boba_fett",
             displayName: "Boba Fett",
             hp: 110,
-            baseAttack: 8,
+            baseAttack: 6,
             totalAttack: 0,
             counter: 11,
         }
