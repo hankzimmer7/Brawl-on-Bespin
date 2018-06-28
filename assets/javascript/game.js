@@ -1,6 +1,8 @@
 // Create booleans to keep track of whether the player's character and enemy have been chosen, and if the game is over
 var characterIsChosen = false;
 var enemyIsChosen = false;
+var difficultyIsChosen = false;
+var difficulty = "normal";
 var gameIsOver = false;
 
 //Create arrays to store the characters, with the character being in a different array depending on if they are the player or an enemy
@@ -15,6 +17,8 @@ var setUpNewGame = function () {
     //Reset the booleans which keep track of whether a character and enemy have been selected, and if the game is over
     characterIsChosen = false;
     enemyIsChosen = false;
+    difficultyIsChosen = false;
+    difficulty = "normal";
     gameIsOver = false;
 
     //Clear the arrays of characters
@@ -23,6 +27,7 @@ var setUpNewGame = function () {
     defendingEnemy.length = 0;
 
     // Remove any characters and titles which may be currently displayed on screen
+    $("#game-area").empty();
     $("#choose-your-character-title").empty();
     $("#character-choice").empty();
     $("#your-character-title").empty();
@@ -33,6 +38,7 @@ var setUpNewGame = function () {
     $("#defender").empty();
     $("#fight-button-location").empty();
     $("#battle-information").empty();
+    $("#reset-button-location").empty();
 
     //Reset the character choices
     characterChoices = [{
@@ -69,23 +75,54 @@ var setUpNewGame = function () {
         }
     ]
 
-    //Initially set the total attack equal to base attack. This is done so tweaks can be done by changing only the base attack.
+    //Initially set the total attack equal to base attack. This is done so balancing can be done by changing only the base attack.
     characterChoices.forEach(function (element) {
         element.totalAttack = element.baseAttack;
     })
 
 
-    //Display each of the character choices on screen
-    characterChoices.forEach(function (element) {
-        $("#character-choice").append(newCharacterCard(element, "availableChoice"));
-    })
+    //---Display the difficulty choice buttons-----
 
-    $("#choose-your-character-title").append("<h3>Choose Your Character:</h3>")
+    //Generate a column to store all of the content
+    var column = $("<div class='col'>");
+    //Generate two rows: One for the instructions and one for the buttons
+    var instructionsRow = $("<div class='row'>");
+    var buttonsRow = $("<div class='row'>");
+    //Generate the columns for the instructions and for the buttons
+    var instructionsColumn = $("<div class='col'>");
+    var buttonsColumn = $("<div class='col'>");
+
+    //Generate the instructions
+    instructionsColumn.append("<h3>Choose the Difficulty:</h3>");
+
+    // Generate the buttons and button descriptions
+    var normalButton = $("<button id='normal-button' type='button' class='btn btn-dark difficulty-button'>");
+    normalButton.text("Normal");
+    var easyButton = $("<button id='easy-button' type='button' class='btn btn-dark difficulty-button'>");
+    easyButton.text("Easy");
+    var normalDescription = $('<span>');
+    normalDescription.text("Stats are hidden")
+    var easyDescription = $('<span>');
+    easyDescription.text("Stats are shown")
+
+    //Append the content to the columns and rows
+    buttonsColumn.append(normalButton, normalDescription, easyButton, easyDescription);
+    instructionsRow.append(instructionsColumn);
+    buttonsRow.append(buttonsColumn);
+    column.append(instructionsRow, buttonsRow);
+
+    //Append to the game area
+    $('#game-area').append(column);
+
+    //------------------------------------------------
 }
-
 
 //Generate a new character card to be displayed on screen
 var newCharacterCard = function (characterArray, characterStatus) {
+
+    //Declare a variable to store the color for the card;
+    var bgColor = "bg-light";
+
     //Add the correct color to the character card depending on the status
     if (characterStatus === "availableChoice") {
         bgColor = "bg-light";
@@ -95,23 +132,26 @@ var newCharacterCard = function (characterArray, characterStatus) {
         bgColor = "bg-danger text-light";
     } else if (characterStatus === "defendingEnemy") {
         bgColor = "bg-dark text-light";
-    } else {
-        bgColor = "bg-light";
     }
 
-    // generate html for a new character card
-    var newCharacterCard =
-        "<div class='col-sm-6 col-lg-3'>" +
-        "<div class='card " + characterStatus + " " + bgColor + "' id = " + characterArray.name + ">" +
-        "<img class='card-img-top' src = 'assets/images/" + characterArray.name + ".jpg' alt = " + characterArray.displayName + ">" +
-        "<div class='card-body'>" +
-        "<h5 class='card-title'>" + characterArray.displayName + "</h5>" +
-        "<p class='card-text'>HP: " + characterArray.hp + "</p>" +
-        "<p class='card-text'>Attack: " + characterArray.totalAttack + "</p>" +
-        "<p class='card-text'>Counter: " + characterArray.counter + "</p>" +
-        "</div>" +
-        "</div>" +
-        "</div>"
+    //Create the new character card elements
+    var newCharacterCard = $("<div class='col-sm-6 col-lg-3'>");
+    var card = $("<div class='card " + characterStatus + " " + bgColor + "' id = " + characterArray.name + ">");
+    var cardImage = $("<img class='card-img-top' src = 'assets/images/" + characterArray.name + ".jpg' alt = " + characterArray.displayName + ">");
+    var cardBody = $("<div class='card-body'>");
+    var cardTitle = $("<h5 class='card-title'>" + characterArray.displayName + "</h5>");
+    var cardText = $("<p class='card-text'>HP: " + characterArray.hp + "</p>");
+
+    //Append everything together onto the new character card
+    cardBody.append(cardTitle, cardText);
+    //If difficulty is set to easy, add the attack and counter stats
+    if (difficulty === "easy") {
+        cardBody.append("<p class='card-text'>Attack: " + characterArray.totalAttack + "</p>");
+        cardBody.append("<p class='card-text'>Counter: " + characterArray.counter + "</p>");
+    }
+    card.append(cardImage, cardBody);
+    newCharacterCard.append(card);
+
     return newCharacterCard;
 }
 
@@ -120,6 +160,36 @@ $(document).ready(function () {
 
     //First, set up a new game
     setUpNewGame();
+
+    //When the difficulty button is clicked
+    $(document).on("click", '.difficulty-button', function () {
+
+        // Determine which button was clicked
+        var clickedButton = this.getAttribute("id");
+
+        // Set the difficulty depending on the button clicked
+        if (clickedButton === "normal-button") {
+            difficulty = "normal";
+            difficultyIsChosen = true;
+        } else if (clickedButton === "easy-button") {
+            difficulty = "easy";
+            difficultyIsChosen = true;
+        }
+
+        $("#game-area").empty();
+
+        //Display each of the character choices on screen
+        $("#choose-your-character-title").append("<h3>Choose Your Character:</h3>")
+        characterChoices.forEach(function (element) {
+            $("#character-choice").append(newCharacterCard(element, "availableChoice"));
+
+        })
+
+        //Display the reset button
+        $("#reset-button-location").append("<button id='reset-button' type='button' class='btn btn-dark'>Reset Game</button>")
+        //Add the click target to the reset button
+        $("#reset-button").attr('onclick', "location.href='index.html'")
+    });
 
     //If the user clicks on one of the available character choices
     $(document).on('click', '.availableChoice', function () {
