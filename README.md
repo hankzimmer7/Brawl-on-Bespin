@@ -18,5 +18,5 @@ The user can win no matter which character they select. The strategy is in selec
 
 ## Technologies Used
 
-* Javascript
+* JavaScript
 * jQuery
