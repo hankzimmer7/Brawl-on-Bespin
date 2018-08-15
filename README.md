@@ -15,3 +15,8 @@ If the player's HP reaches 0, the user loses the game.
 ## Strategy
 
 The user can win no matter which character they select. The strategy is in selecting which opponents to fight first and which to fight later after the player's attack attribute has increased.
+
+## Technologies Used
+
+* Javascript
+* jQuery
